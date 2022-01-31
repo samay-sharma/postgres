@@ -262,18 +262,7 @@ task:
     - cd ${HOME}/homebrew
     - curl -L https://github.com/Homebrew/brew/tarball/master | tar xz --strip 1
     - export PATH="${HOME}/homebrew/bin/:$PATH"
-    - brew install \
-      ccache \
-      icu4c \
-      krb5 \
-      llvm \
-      lz4 \
-      make \
-      openldap \
-      openssl \
-      python \
-      tcl-tk
-
+    - brew install ccache icu4c krb5 llvm lz4 make openldap openssl python tcl-tk
     - brew cleanup -s # to reduce cache size
   upload_caches: homebrew
 
