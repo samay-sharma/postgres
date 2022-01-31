@@ -259,7 +259,8 @@ task:
     folder: $HOMEBREW_CACHE
   homebrew_install_script:
     - mkdir ${HOME}/homebrew
-    - curl -L https://github.com/Homebrew/brew/tarball/master | tar xz --strip 1 -C homebrew
+    - cd ${HOME}/homebrew
+    - curl -L https://github.com/Homebrew/brew/tarball/master | tar xz --strip 1
     - export PATH="${HOME}/homebrew/bin/:$PATH"
     - brew install \
       ccache \
