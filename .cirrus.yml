@@ -273,7 +273,7 @@ task:
       python \
       tcl-tk
 
-    brew cleanup -s # to reduce cache size
+    - brew cleanup -s # to reduce cache size
   upload_caches: homebrew
 
   ccache_cache:
