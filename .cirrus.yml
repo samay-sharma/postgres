@@ -257,8 +257,11 @@ task:
   # packages do not need to be downloaded.
   homebrew_cache:
     folder: $HOMEBREW_CACHE
-  homebrew_install_script: |
-    brew install \
+  homebrew_install_script:
+    - mkdir ${HOME}/homebrew
+    - curl -L https://github.com/Homebrew/brew/tarball/master | tar xz --strip 1 -C homebrew
+    - export PATH="${HOME}/homebrew/bin/:$PATH"
+    - brew install \
       ccache \
       icu4c \
       krb5 \
@@ -276,7 +279,7 @@ task:
   ccache_cache:
     folder: $CCACHE_DIR
   configure_script: |
-    brewpath="/usr/local"
+    brewpath=${HOME}/homebrew
     INCLUDES="${brewpath}/include:${INCLUDES}"
     LIBS="${brewpath}/lib:${LIBS}"
 
