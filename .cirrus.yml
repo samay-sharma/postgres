@@ -227,7 +227,7 @@ task:
 
     CIRRUS_WORKING_DIR: ${HOME}/pgsql/
     CCACHE_DIR: ${HOME}/ccache
-    HOMEBREW_CACHE: ${HOME}/homebrew-cache
+      #    HOMEBREW_CACHE: ${HOME}/homebrew-cache
     PERL5LIB: ${HOME}/perl5/lib/perl5
 
   only_if: $CIRRUS_CHANGE_MESSAGE !=~ '.*\nci-os-only:.*' || $CIRRUS_CHANGE_MESSAGE =~ '.*\nci-os-only:[^\n]*(macos|darwin|osx).*'
@@ -256,7 +256,7 @@ task:
   # homebrew installation takes a good bit of time every time, even if the
   # packages do not need to be downloaded.
   homebrew_cache:
-    folder: $HOMEBREW_CACHE
+    folder: /usr/local/
   homebrew_install_script: |
     brew install \
       ccache \
