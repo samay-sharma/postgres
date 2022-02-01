@@ -257,8 +257,9 @@ task:
   # packages do not need to be downloaded.
   homebrew_cache:
     folder: /usr/local/
-  homebrew_install_script: |
-    brew install \
+  homebrew_install_script: 
+    - sudo chmod a+w /usr/local
+    - brew install \
       ccache \
       icu4c \
       krb5 \
