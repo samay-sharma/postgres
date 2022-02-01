@@ -259,19 +259,8 @@ task:
     folder: /usr/local/
   homebrew_install_script: 
     - sudo chmod a+w /usr/local
-    - brew install \
-      ccache \
-      icu4c \
-      krb5 \
-      llvm \
-      lz4 \
-      make \
-      openldap \
-      openssl \
-      python \
-      tcl-tk
-
-    brew cleanup -s # to reduce cache size
+    - brew install ccache icu4c krb5 llvm lz4 make openldap openssl python tcl-tk
+    - brew cleanup -s # to reduce cache size
   upload_caches: homebrew
 
   ccache_cache:
