@@ -251,6 +251,8 @@ task:
     - perl -mIO::Pty -e 1 || cpan -T IO::Pty
   upload_caches: perl
 
+  permissions_script:
+    - sudo chmod a+w /usr/local
 
   # XXX: Could we instead install homebrew into a cached directory? The
   # homebrew installation takes a good bit of time every time, even if the
@@ -258,7 +260,6 @@ task:
   homebrew_cache:
     folder: /usr/local/
   homebrew_install_script: 
-    - sudo chmod a+w /usr/local
     - brew install ccache icu4c krb5 llvm lz4 make openldap openssl python tcl-tk
     - brew cleanup -s # to reduce cache size
   upload_caches: homebrew
