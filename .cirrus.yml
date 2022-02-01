@@ -252,7 +252,7 @@ task:
   upload_caches: perl
 
   permissions_script:
-    - sudo chmod a+w /usr/local
+    - sudo chown -R $(whoami) $(brew --prefix)/*
 
   # XXX: Could we instead install homebrew into a cached directory? The
   # homebrew installation takes a good bit of time every time, even if the
