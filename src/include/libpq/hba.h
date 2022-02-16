@@ -38,6 +38,7 @@ typedef enum UserAuth
 	uaLDAP,
 	uaCert,
 	uaRADIUS,
+	uaCustom,
 	uaPeer
 #define USER_AUTH_LAST uaPeer	/* Must be last value of this enum */
 } UserAuth;
@@ -120,6 +121,7 @@ typedef struct HbaLine
 	char	   *radiusidentifiers_s;
 	List	   *radiusports;
 	char	   *radiusports_s;
+	char	   *custom_provider;
 } HbaLine;
 
 typedef struct IdentLine
@@ -143,5 +145,7 @@ extern int	check_usermap(const char *usermap_name,
 						  const char *pg_role, const char *auth_user,
 						  bool case_sensitive);
 extern bool pg_isblank(const char c);
+
+extern char *custom_provider_name;
 
 #endif							/* HBA_H */

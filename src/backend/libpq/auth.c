@@ -47,8 +47,6 @@
  *----------------------------------------------------------------
  */
 static void auth_failed(Port *port, int status, const char *logdetail);
-static char *recv_password_packet(Port *port);
-static void set_authn_id(Port *port, const char *id);
 
 
 /*----------------------------------------------------------------
@@ -206,23 +204,6 @@ static int	pg_SSPI_make_upn(char *accountname,
 static int	CheckRADIUSAuth(Port *port);
 static int	PerformRadiusTransaction(const char *server, const char *secret, const char *portstr, const char *identifier, const char *user_name, const char *passwd);
 
-
-/*
- * Maximum accepted size of GSS and SSPI authentication tokens.
- * We also use this as a limit on ordinary password packet lengths.
- *
- * Kerberos tickets are usually quite small, but the TGTs issued by Windows
- * domain controllers include an authorization field known as the Privilege
- * Attribute Certificate (PAC), which contains the user's Windows permissions
- * (group memberships etc.). The PAC is copied into all tickets obtained on
- * the basis of this TGT (even those issued by Unix realms which the Windows
- * realm trusts), and can be several kB in size. The maximum token size
- * accepted by Windows systems is determined by the MaxAuthToken Windows
- * registry setting. Microsoft recommends that it is not set higher than
- * 65535 bytes, so that seems like a reasonable limit for us as well.
- */
-#define PG_MAX_AUTH_TOKEN_LENGTH	65535
-
 /*----------------------------------------------------------------
  * Global authentication functions
  *----------------------------------------------------------------
@@ -234,6 +215,16 @@ static int	PerformRadiusTransaction(const char *server, const char *secret, cons
  * to record login events, insert a delay after failed authentication, etc.
  */
 ClientAuthentication_hook_type ClientAuthentication_hook = NULL;
+
+/*
+ * These hooks allow plugins to get control of the client authentication check
+ * and error reporting logic. This allows users to write extensions to
+ * implement authentication using any protocol of their choice. To acquire these
+ * hooks, plugins need to call the RegisterAuthProvider() function.
+ */
+static CustomAuthenticationCheck_hook_type CustomAuthenticationCheck_hook = NULL;
+static CustomAuthenticationError_hook_type CustomAuthenticationError_hook = NULL;
+char *custom_provider_name = NULL;
 
 /*
  * Tell the user the authentication failed, but not (much about) why.
@@ -311,6 +302,12 @@ auth_failed(Port *port, int status, const char *logdetail)
 		case uaRADIUS:
 			errstr = gettext_noop("RADIUS authentication failed for user \"%s\"");
 			break;
+		case uaCustom:
+			if (CustomAuthenticationError_hook)
+				errstr = CustomAuthenticationError_hook(port);
+			else
+				errstr = gettext_noop("Custom authentication failed for user \"%s\"");
+			break;
 		default:
 			errstr = gettext_noop("authentication failed for user \"%s\": invalid authentication method");
 			break;
@@ -345,7 +342,7 @@ auth_failed(Port *port, int status, const char *logdetail)
  * lifetime of the Port, so it is safe to pass a string that is managed by an
  * external library.
  */
-static void
+void
 set_authn_id(Port *port, const char *id)
 {
 	Assert(id);
@@ -630,6 +627,10 @@ ClientAuthentication(Port *port)
 		case uaTrust:
 			status = STATUS_OK;
 			break;
+		case uaCustom:
+			if (CustomAuthenticationCheck_hook)
+				status = CustomAuthenticationCheck_hook(port);
+			break;
 	}
 
 	if ((status == STATUS_OK && port->hba->clientcert == clientCertFull)
@@ -689,7 +690,7 @@ sendAuthRequest(Port *port, AuthRequest areq, const char *extradata, int extrale
  *
  * Returns NULL if couldn't get password, else palloc'd string.
  */
-static char *
+char *
 recv_password_packet(Port *port)
 {
 	StringInfoData buf;
@@ -3342,4 +3343,46 @@ PerformRadiusTransaction(const char *server, const char *secret, const char *por
 			continue;
 		}
 	}							/* while (true) */
+}
+
+/*----------------------------------------------------------------
+ * Custom authentication
+ *----------------------------------------------------------------
+ */
+
+/*
+ * RegisterAuthProvider registers a custom authentication provider to be
+ * used for authentication. Currently, we allow only one authentication
+ * provider to be registered for use at a time.
+ *
+ * This function should be called in _PG_init() by any extension looking to
+ * add a custom authentication method.
+ */
+void RegisterAuthProvider(const char *provider_name,
+		CustomAuthenticationCheck_hook_type AuthenticationCheckFunction,
+		CustomAuthenticationError_hook_type AuthenticationErrorFunction)
+{
+	if (provider_name == NULL)
+	{
+		ereport(ERROR,
+				(errmsg("cannot register authentication provider without name")));
+	}
+
+	if (AuthenticationCheckFunction == NULL)
+	{
+		ereport(ERROR,
+				(errmsg("cannot register authentication provider without a check function")));
+	}
+
+	if (custom_provider_name)
+	{
+		ereport(ERROR,
+				(errmsg("cannot register authentication provider %s", provider_name),
+				 errdetail("Only one authentication provider allowed.  Provider %s is already registered.",
+							custom_provider_name)));
+	}
+
+	custom_provider_name = pstrdup(provider_name);
+	CustomAuthenticationCheck_hook = AuthenticationCheckFunction;
+	CustomAuthenticationError_hook = AuthenticationErrorFunction;
 }

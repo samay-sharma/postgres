@@ -134,6 +134,7 @@ static const char *const UserAuthName[] =
 	"ldap",
 	"cert",
 	"radius",
+	"custom",
 	"peer"
 };
 
@@ -1399,6 +1400,8 @@ parse_hba_line(TokenizedLine *tok_line, int elevel)
 #endif
 	else if (strcmp(token->string, "radius") == 0)
 		parsedline->auth_method = uaRADIUS;
+	else if (strcmp(token->string, "custom") == 0)
+		parsedline->auth_method = uaCustom;
 	else
 	{
 		ereport(elevel,
@@ -1689,6 +1692,14 @@ parse_hba_line(TokenizedLine *tok_line, int elevel)
 		 * the level of verify-full.
 		 */
 		parsedline->clientcert = clientCertFull;
+	}
+
+	/*
+	 * Ensure that the provider name is specified for custom authentication method.
+	 */
+	if (parsedline->auth_method == uaCustom)
+	{
+		MANDATORY_AUTH_ARG(parsedline->custom_provider, "provider", "custom");
 	}
 
 	return parsedline;
@@ -2101,6 +2112,31 @@ parse_hba_auth_opt(char *name, char *val, HbaLine *hbaline,
 
 		hbaline->radiusidentifiers = parsed_identifiers;
 		hbaline->radiusidentifiers_s = pstrdup(val);
+	}
+	else if (strcmp(name, "provider") == 0)
+	{
+		REQUIRE_AUTH_OPTION(uaCustom, "provider", "custom");
+
+		/*
+		 * Verify that the provider mentioned is same as the one loaded
+		 * via shared_preload_libraries.
+		 */
+
+		if (custom_provider_name == NULL || strcmp(val,custom_provider_name) != 0)
+		{
+			ereport(elevel,
+					(errcode(ERRCODE_CONFIG_FILE_ERROR),
+					 errmsg("cannot use authentication provider %s",val),
+					 errhint("Load authentication provider via shared_preload_libraries."),
+					 errcontext("line %d of configuration file \"%s\"",
+							line_num, HbaFileName)));
+
+			return false;
+		}
+		else
+		{
+			hbaline->custom_provider = pstrdup(val);
+		}
 	}
 	else
 	{
