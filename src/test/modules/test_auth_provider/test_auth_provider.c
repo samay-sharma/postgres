@@ -39,7 +39,27 @@ static int TestAuthenticationCheck(Port *port)
 	int result = STATUS_ERROR;
 	char *real_pass;
 	const char *logdetail = NULL;
+	ListCell *lc;
 
+	/*
+	 * If user's name is in the the "allow" list, do not request password
+	 * for them and allow them to authenticate.
+	 */
+	foreach(lc,port->hba->custom_auth_options)
+	{
+		CustomOption *option = (CustomOption *) lfirst(lc);
+		if (strcmp(option->name, "allow") == 0 &&
+			strcmp(option->value, port->user_name) == 0)
+		{
+			set_authn_id(port, port->user_name);
+			return STATUS_OK;
+		}
+	}
+
+	/*
+	 * Encrypt the password and validate that it's the same as the one
+	 * returned by the client.
+	 */
 	real_pass = get_encrypted_password_for_user(port->user_name);
 	if (real_pass)
 	{
@@ -79,8 +99,36 @@ static const char *TestAuthenticationError(Port *port)
 	return error_message;
 }
 
+/*
+ * Returns if the options passed are supported by the extension
+ * and are valid. Currently only "allow" is supported.
+ */
+static bool TestAuthenticationOptions(char *name, char *val, HbaLine *hbaline, char **err_msg)
+{
+	/* Validate that an actual user is in the "allow" list. */
+	if (strcmp(name,"allow") == 0)
+	{
+		for (int i=0;i<3;i++)
+		{
+			if (strcmp(val,credentials[0][i]) == 0)
+			{
+				return true;
+			}
+		}
+
+		*err_msg = psprintf("\"%s\" is not valid value for option \"%s\"", val, name);
+		return false;
+	}
+	else
+	{
+		*err_msg = psprintf("option \"%s\" not recognized by \"%s\" provider", val, hbaline->custom_provider);
+		return false;
+	}
+}
+
 void
 _PG_init(void)
 {
-	RegisterAuthProvider("test", TestAuthenticationCheck, TestAuthenticationError);
+	RegisterAuthProvider("test", TestAuthenticationCheck,
+						 TestAuthenticationError,TestAuthenticationOptions);
 }

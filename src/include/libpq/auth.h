@@ -31,21 +31,28 @@ typedef int (*CustomAuthenticationCheck_hook_type) (Port *);
 typedef void (*ClientAuthentication_hook_type) (Port *, int);
 extern PGDLLIMPORT ClientAuthentication_hook_type ClientAuthentication_hook;
 
+/* Declarations for custom authentication providers */
+
 /* Hook for plugins to report error messages in auth_failed() */
 typedef const char * (*CustomAuthenticationError_hook_type) (Port *);
 
-extern void RegisterAuthProvider
-		(const char *provider_name,
-		 CustomAuthenticationCheck_hook_type CustomAuthenticationCheck_hook,
-		 CustomAuthenticationError_hook_type CustomAuthenticationError_hook);
+/* Hook for plugins to validate custom authentication options */
+typedef bool (*CustomAuthenticationValidateOptions_hook_type)
+			 (char *, char *, HbaLine *, char **);
 
-/* Declarations for custom authentication providers */
 typedef struct CustomAuthProvider
 {
 	const char *name;
 	CustomAuthenticationCheck_hook_type auth_check_hook;
 	CustomAuthenticationError_hook_type auth_error_hook;
+	CustomAuthenticationValidateOptions_hook_type auth_options_hook;
 } CustomAuthProvider;
+
+extern void RegisterAuthProvider
+		(const char *provider_name,
+		 CustomAuthenticationCheck_hook_type CustomAuthenticationCheck_hook,
+		 CustomAuthenticationError_hook_type CustomAuthenticationError_hook,
+		 CustomAuthenticationValidateOptions_hook_type CustomAuthenticationOptions_hook);
 
 extern CustomAuthProvider *get_provider_by_name(const char *name);
 

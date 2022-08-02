@@ -3361,7 +3361,8 @@ PerformRadiusTransaction(const char *server, const char *secret, const char *por
  */
 void RegisterAuthProvider(const char *provider_name,
 		CustomAuthenticationCheck_hook_type AuthenticationCheckFunction,
-		CustomAuthenticationError_hook_type AuthenticationErrorFunction)
+		CustomAuthenticationError_hook_type AuthenticationErrorFunction,
+		CustomAuthenticationValidateOptions_hook_type AuthenticationOptionsFunction)
 {
 	CustomAuthProvider *provider = NULL;
 	MemoryContext old_context;
@@ -3387,6 +3388,7 @@ void RegisterAuthProvider(const char *provider_name,
 	provider->name = MemoryContextStrdup(TopMemoryContext,provider_name);
 	provider->auth_check_hook = AuthenticationCheckFunction;
 	provider->auth_error_hook = AuthenticationErrorFunction;
+	provider->auth_options_hook = AuthenticationOptionsFunction;
 	custom_auth_providers = lappend(custom_auth_providers, provider);
 	MemoryContextSwitchTo(old_context);
 }

@@ -78,6 +78,13 @@ typedef enum ClientCertName
 	clientCertDN
 } ClientCertName;
 
+/* Struct for custom options defined by custom auth plugins */
+typedef struct CustomOption
+{
+	char	*name;
+	char	*value;
+}CustomOption;
+
 typedef struct HbaLine
 {
 	int			linenumber;
@@ -122,6 +129,7 @@ typedef struct HbaLine
 	List	   *radiusports;
 	char	   *radiusports_s;
 	char	   *custom_provider;
+	List	   *custom_auth_options;
 } HbaLine;
 
 typedef struct IdentLine

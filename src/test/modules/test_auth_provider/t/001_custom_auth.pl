@@ -109,6 +109,28 @@ test_hba_reload($node, 'custom', 1);
 # Test that correct provider name allows reload to succeed.
 test_hba_reload($node, 'custom provider=test', 0);
 
+# Tests for custom auth options
+
+# Test that a custom option doesn't work without a provider.
+test_hba_reload($node, 'custom allow=bob', 1);
+
+# Test that options other than allowed ones are not accepted.
+test_hba_reload($node, 'custom provider=test wrong=true', 1);
+
+# Test that only valid values are accepted for allowed options.
+test_hba_reload($node, 'custom provider=test allow=wrong', 1);
+
+# Test that setting allow option for a user doesn't look at the password.
+test_hba_reload($node, 'custom provider=test allow=bob', 0);
+$ENV{"PGPASSWORD"} = 'bad123';
+test_role($node, 'bob', 'custom', 0, log_like => [qr/connection authorized: user=bob/]);
+
+# Password is still checked for other users.
+test_role($node, 'alice', 'custom', 2, log_unlike => [qr/connection authorized:/]);
+
+# Reset the password for future tests.
+$ENV{"PGPASSWORD"} = 'bob123';
+
 # Custom auth modules require mentioning extension in shared_preload_libraries.
 
 # Remove extension from shared_preload_libraries and try to restart.
