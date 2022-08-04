@@ -69,7 +69,7 @@ sub test_role
 my $node = PostgreSQL::Test::Cluster->new('server');
 $node->init;
 $node->append_conf('postgresql.conf', "log_connections = on\n");
-$node->append_conf('postgresql.conf', "shared_preload_libraries = 'test_auth_provider.so'\n");
+$node->append_conf('postgresql.conf', "shared_preload_libraries = 'test_auth_provider'\n");
 $node->start;
 
 $node->safe_psql('postgres', "CREATE ROLE bob SUPERUSER LOGIN;");
@@ -138,7 +138,7 @@ $node->adjust_conf('postgresql.conf', 'shared_preload_libraries', "''");
 command_fails(['pg_ctl', '-w', '-D', $node->data_dir, '-l', $node->logfile, 'restart'],'restart with empty shared_preload_libraries failed');
 
 # Fix shared_preload_libraries and confirm that you can now restart.
-$node->adjust_conf('postgresql.conf', 'shared_preload_libraries', "'test_auth_provider.so'");
+$node->adjust_conf('postgresql.conf', 'shared_preload_libraries', "'test_auth_provider'");
 command_ok(['pg_ctl', '-w', '-D', $node->data_dir, '-l', $node->logfile,'start'],'restart with correct shared_preload_libraries succeeded');
 
 # Test that we can connect again
