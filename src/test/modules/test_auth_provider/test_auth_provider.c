@@ -6,7 +6,7 @@
  * Copyright (c) 2022, PostgreSQL Global Development Group
  *
  * IDENTIFICATION
- *		contrib/test_auth_provider/test_auth_provider.c
+ *		src/test/modules/test_auth_provider/test_auth_provider.c
  *
  * -------------------------------------------------------------------------
  */

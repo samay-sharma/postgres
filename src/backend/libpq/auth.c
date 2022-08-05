@@ -3379,6 +3379,13 @@ void RegisterAuthProvider(const char *provider_name,
 				(errmsg("cannot register authentication provider without a check function")));
 	}
 
+	if (!process_shared_preload_libraries_in_progress)
+	{
+		ereport(ERROR,
+				(errmsg("failed to register authentication provider with name %s",  provider_name),
+				 errdetail("Custom authentication provider must be initialized via shared_preload_libraries.")));
+	}
+
 	/*
 	 * Allocate in top memory context as we need to read this whenever
 	 * we parse pg_hba.conf
