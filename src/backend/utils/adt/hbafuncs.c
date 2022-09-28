@@ -147,6 +147,23 @@ get_hba_options(HbaLine *hba)
 				CStringGetTextDatum(psprintf("radiusports=%s", hba->radiusports_s));
 	}
 
+	if (hba->auth_method == uaCustom)
+	{
+		if (hba->custom_provider)
+			options[noptions++] =
+				CStringGetTextDatum(psprintf("provider=%s", hba->custom_provider));
+	}
+	if (hba->custom_auth_options)
+	{
+		ListCell *lc;
+		foreach(lc, hba->custom_auth_options)
+		{
+			CustomOption *option = (CustomOption *)lfirst(lc);
+			options[noptions++] =
+				CStringGetTextDatum(psprintf("%s=%s",option->name, option->value));
+		}
+	}
+
 	/* If you add more options, consider increasing MAX_HBA_OPTIONS. */
 	Assert(noptions <= MAX_HBA_OPTIONS);
 
