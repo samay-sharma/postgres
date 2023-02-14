@@ -1371,51 +1371,6 @@ build-postgresql:
 
    </sect3>
 
-   <sect3 id="configure-options-misc">
-    <title>Miscellaneous</title>
-
-    <para>
-     It's fairly common, particularly for test builds, to adjust the
-     default port number with <option>--with-pgport</option>.
-     The other options in this section are recommended only for advanced
-     users.
-    </para>
-
-     <variablelist>
-
-      <varlistentry id="configure-option-with-pgport">
-       <term><option>--with-pgport=<replaceable>NUMBER</replaceable></option></term>
-       <listitem>
-        <para>
-         Set <replaceable>NUMBER</replaceable> as the default port number for
-         server and clients. The default is 5432. The port can always
-         be changed later on, but if you specify it here then both
-         server and clients will have the same default compiled in,
-         which can be very convenient.  Usually the only good reason
-         to select a non-default value is if you intend to run multiple
-         <productname>PostgreSQL</productname> servers on the same machine.
-        </para>
-       </listitem>
-      </varlistentry>
-
-      <varlistentry id="configure-option-with-krb-srvnam">
-       <term><option>--with-krb-srvnam=<replaceable>NAME</replaceable></option></term>
-       <listitem>
-        <para>
-         The default name of the Kerberos service principal used
-         by GSSAPI.
-         <literal>postgres</literal> is the default. There's usually no
-         reason to change this unless you are building for a Windows
-         environment, in which case it must be set to upper case
-         <literal>POSTGRES</literal>.
-        </para>
-       </listitem>
-      </varlistentry>
-
-     </variablelist>
-
-   </sect3>
-
    <sect3 id="configure-options-data-layout">
     <title>Data layout Options</title>
 
@@ -1681,6 +1636,51 @@ build-postgresql:
          <application>ECPG</application> programs from safely controlling
          their private connection handles.  Use this only on platforms
          with deficient threading support.
+        </para>
+       </listitem>
+      </varlistentry>
+
+     </variablelist>
+
+   </sect3>
+
+   <sect3 id="configure-options-misc">
+    <title>Miscellaneous</title>
+
+    <para>
+     It's fairly common, particularly for test builds, to adjust the
+     default port number with <option>--with-pgport</option>.
+     The other options in this section are recommended only for advanced
+     users.
+    </para>
+
+     <variablelist>
+
+      <varlistentry id="configure-option-with-pgport">
+       <term><option>--with-pgport=<replaceable>NUMBER</replaceable></option></term>
+       <listitem>
+        <para>
+         Set <replaceable>NUMBER</replaceable> as the default port number for
+         server and clients. The default is 5432. The port can always
+         be changed later on, but if you specify it here then both
+         server and clients will have the same default compiled in,
+         which can be very convenient.  Usually the only good reason
+         to select a non-default value is if you intend to run multiple
+         <productname>PostgreSQL</productname> servers on the same machine.
+        </para>
+       </listitem>
+      </varlistentry>
+
+      <varlistentry id="configure-option-with-krb-srvnam">
+       <term><option>--with-krb-srvnam=<replaceable>NAME</replaceable></option></term>
+       <listitem>
+        <para>
+         The default name of the Kerberos service principal used
+         by GSSAPI.
+         <literal>postgres</literal> is the default. There's usually no
+         reason to change this unless you are building for a Windows
+         environment, in which case it must be set to upper case
+         <literal>POSTGRES</literal>.
         </para>
        </listitem>
       </varlistentry>
@@ -2837,42 +2837,6 @@ ninja install
     </variablelist>
    </sect3>
 
-   <sect3 id="meson-options-misc">
-    <title>Miscellaneous</title>
-
-    <variablelist>
-     <varlistentry id="configure-pgport-meson">
-      <term><option>-Dpgport=<replaceable>NUMBER</replaceable></option></term>
-      <listitem>
-       <para>
-        Set <replaceable>NUMBER</replaceable> as the default port number for
-        server and clients. The default is 5432. The port can always
-        be changed later on, but if you specify it here then both
-        server and clients will have the same default compiled in,
-        which can be very convenient.  Usually the only good reason
-        to select a non-default value is if you intend to run multiple
-        <productname>PostgreSQL</productname> servers on the same machine.
-       </para>
-      </listitem>
-     </varlistentry>
-
-     <varlistentry id="configure-krb-srvnam-meson">
-      <term><option>-Dkrb_srvnam=<replaceable>NAME</replaceable></option></term>
-      <listitem>
-       <para>
-        The default name of the Kerberos service principal used
-        by GSSAPI.
-        <literal>postgres</literal> is the default. There's usually no
-        reason to change this unless you are building for a Windows
-        environment, in which case it must be set to upper case
-        <literal>POSTGRES</literal>.
-       </para>
-      </listitem>
-     </varlistentry>
-
-    </variablelist>
-   </sect3>
-
    <sect3 id="meson-options-data-layout">
     <title>Data layout Options</title>
 
@@ -3135,6 +3099,43 @@ ninja install
       </varlistentry>
      </variablelist>
    </sect3>
+
+   <sect3 id="meson-options-misc">
+    <title>Miscellaneous</title>
+
+    <variablelist>
+     <varlistentry id="configure-pgport-meson">
+      <term><option>-Dpgport=<replaceable>NUMBER</replaceable></option></term>
+      <listitem>
+       <para>
+        Set <replaceable>NUMBER</replaceable> as the default port number for
+        server and clients. The default is 5432. The port can always
+        be changed later on, but if you specify it here then both
+        server and clients will have the same default compiled in,
+        which can be very convenient.  Usually the only good reason
+        to select a non-default value is if you intend to run multiple
+        <productname>PostgreSQL</productname> servers on the same machine.
+       </para>
+      </listitem>
+     </varlistentry>
+
+     <varlistentry id="configure-krb-srvnam-meson">
+      <term><option>-Dkrb_srvnam=<replaceable>NAME</replaceable></option></term>
+      <listitem>
+       <para>
+        The default name of the Kerberos service principal used
+        by GSSAPI.
+        <literal>postgres</literal> is the default. There's usually no
+        reason to change this unless you are building for a Windows
+        environment, in which case it must be set to upper case
+        <literal>POSTGRES</literal>.
+       </para>
+      </listitem>
+     </varlistentry>
+
+    </variablelist>
+   </sect3>
+
   </sect2>
  </sect1>
 
